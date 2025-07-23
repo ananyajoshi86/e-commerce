@@ -22,7 +22,7 @@ const addproductcontroller = async (req, res) => {
       category,
       rating: rating || 0,
       image: file
-        ? { path: file.filename, filename: file.originalname }
+        ? { path: "https://e-commerce-foodmart.onrender.com/" + file.filename, filename: file.originalname }
         : undefined,
     });
 
