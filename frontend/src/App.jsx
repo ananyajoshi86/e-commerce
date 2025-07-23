@@ -40,12 +40,13 @@ function App() {
           <Route path="/new-password" element={<NewPassword />} />
           <Route path="/search" element={<SearchProduct />} />
           <Route path="/loginadmin" exact element={<AdminLogin />} />
-          <ProtectedAdmin>
           <Route
             path="/admin"
             exact
             element={
+              <ProtectedAdmin>
                 <AdminSidebar />
+                </ProtectedAdmin>
             }
           >
             <Route path="/adminDashboard" exact element={<AdminDashboard />} />
@@ -54,7 +55,6 @@ function App() {
             <Route path="/stats" exact element={<Stats />} />
             <Route path="/addproduct" exact element={<AddProduct />} />
           </Route>
-              </ProtectedAdmin>
           <Route path="/product/:id" exact element={<Product />} />
           <Route path="/category" exact element={<Category />} />
           <Route path="/filter/:category" exact element={<Categoryfilter />} />
