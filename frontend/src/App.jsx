@@ -22,7 +22,7 @@ import AdminDashboard from "./Admin/AdminDashboard";
 import AdminLogin from "./Admin/AdminLogin";
 import AdminSidebar from "./Admin/AdminSidebar";
 
-import Categoryfilter from "./components/categoryfilter";
+import Categoryfilter from "./components/Categoryfilter";
 import Category from "./components/Category";
 
 function App() {
