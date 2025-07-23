@@ -1,19 +1,17 @@
 const { Router } = require("express");
-const path = require("path");
-const multer = require("multer");
+const { loginadmin, registeradmin } = require("../Controllers/adminController");
+const adminAuth = require("../Middlewares/authMiddleware");
 
-const upload = require("../Middlewares/upload.js");
-const jwt = require("jsonwebtoken");
-const {
-  loginadmin,
-  registeradmin,
-} = require("../Controllers/adminController.js");
-const verifyToken = require("../Middlewares/verifyToken.js");
-const fs = require("fs");
+
 const router = Router();
 
+// Public admin routes
 router.post("/register", registeradmin);
-
 router.post("/login", loginadmin);
+
+// Protected admin route
+router.get("/dashboard", adminAuth, (req, res) => {
+  res.send(`Welcome, Admin: ${req.admin.name}`);
+});
 
 module.exports = router;

@@ -1,46 +1,52 @@
+// userController.js
 const User = require("../Models/userModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../Middlewares/sendEmail.js");
 const mongoose = require("mongoose");
 
-// Register User
+// register user
 const registeruserController = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
+    const image = null;
+    if (req.file) {
+      image = {
+        filename: req.file.filename,
+        path: "http://localhost:5000/" + req.file.path,
+      };
+    }
     if (!name || !email || !password ) {
       return res
         .status(400)
         .send({ success: false, message: "Missing required fields" });
     }
+     const user = await User.findOne({ email });
+     if (user) {
+       return res
+         .status(400)
+         .send({ success: false, message: "User already registered" });
+     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
-
-      // img: {
-      //   filename: req.file.filename,
-      //   path: req.file.filename,
-      // },
     });
     await sendEmail(email);
-    res.status(201).send({
-      success: true,
-      message: "Created Successfully",
-      data: newUser,
-    });
+    res
+      .status(201)
+      .send({ success: true, message: "Created Successfully", data: newUser });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
 };
 
-
-alluserController = async (req, res) => {
+// get all user
+const alluserController = async (req, res) => {
   try {
-    const users = await User.find({});
-    res.status(200).send({
+    const users = await User.find({}, "-password");
+    res.status(200).json({
       success: true,
       data: users,
       message: "Fetched all users successfully.",
@@ -50,84 +56,78 @@ alluserController = async (req, res) => {
   }
 };
 
-uploadImageController = (req, res) => {
+// upload user image
+const uploadImageController = (req, res) => {
   try {
     res.send({
       success: true,
-      message: "img uploaded successfully",
-      imagename: req.file.filename,
+      message: "Image uploaded successfully",
+      image: req.file.filename,
     });
   } catch (error) {
     res.status(400).send({ success: false, message: error.message });
   }
 };
 
-let loginController = async (req, res) => {
+// user login
+const loginController = async (req, res) => {
   try {
-    let { email, password } = req.body;
-    let user = await User.findOne({ email });
-    if (!user) {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).send({success:false, message:"Email and password are required"})
+    }
+    const user = await User.findOne({ email });
+    if (!user)
       return res
         .status(404)
         .send({ success: false, message: "User not found" });
-    }
-    let isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
       return res
         .status(401)
         .send({ success: false, message: "Invalid credentials" });
-    }
-    let token = jwt.sign(
+
+    const token = jwt.sign(
       { id: user._id, email: user.email, name: user.name, img: user.img },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
+
     res
       .status(200)
-      .send({ success: true, message: "User login successful", token, user });
-  } catch (error) {
-    res.status(500).send({ success: false, message: error.message });
-  }
-};
-let deleteuserController = async (req, res) => {
-  try {
-    let id = req.headers.id;
-    console.log(id);
-    let user = await User.findById(id);
-    if (!user) {
-      return res
-        .status(500)
-        .send({ success: false, message: "user not found" });
-    }
-    let data = await User.findByIdAndDelete(id);
-    res.send({ success: true, message: "Users deleted successfully", data });
+      .send({ success: true, message: "Login successful", token, user });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
 };
 
-const getProfileController = async (req, res) => {
+// delete user
+const deleteuserController = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .send({ success: false, message: "No token provided" });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-
-    const user = await User.findById(userId).select("-password"); // Exclude password
-
-    if (!user) {
+    const userId = req.headers.id;
+    const user = await User.findById(userId);
+    if (!user)
       return res
         .status(404)
         .send({ success: false, message: "User not found" });
-    }
+
+    await User.findByIdAndDelete(userId);
+    res.send({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).send({ success: false, message: error.message });
+  }
+};
+
+// get user profile
+const getProfileController = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user)
+      return res
+        .status(404)
+        .send({ success: false, message: "User not found" });
 
     res.status(200).send({ success: true, data: user });
   } catch (error) {
@@ -135,134 +135,106 @@ const getProfileController = async (req, res) => {
   }
 };
 
-let forgotpassword = async (req, res) => {
+// forgot password
+const forgotpassword = async (req, res) => {
   try {
-    let { email } = req.body;
-
-    let user = await User.findOne({ email });
-    if (!user) {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user)
       return res
         .status(400)
         .json({ success: false, message: "User Not Found" });
-    }
-    let genrateotp = () => {
-      return Math.floor(100000 + Math.random() * 900000).toString();
-    };
 
-    let otp = genrateotp();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "300s",
+    });
 
-    let genratetoken = async (id) => {
-      let token = await jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: "300s",
-      });
-      return token;
-    };
-    let forgot_token = await genratetoken(user._id);
     await User.findByIdAndUpdate(user._id, {
       forgot_password_otp: otp,
-      forgot_password_token: forgot_token,
+      forgot_password_token: token,
     });
+    await sendEmail(email, `Your OTP: ${otp}`);
 
-    await sendEmail(email, `this is your otp:  ${otp}`);
-
-    res.status(200).json({
-      success: true,
-      message: "forgot otp sent , Please check your registered mail",
-      token: forgot_token,
-    });
-  } catch (error) {
-    res.status(400).send({ success: false, message: error.message });
-  }
-};
-let verifyOtp = async (req, res) => {
-  try {
-    let { otp, token } = req.body;
-
-    let decode = await jwt.verify(token, process.env.JWT_SECRET);
-    let user = await User.findById(decode.id);
-    if (!user) {
-      return res.status(404).send({ sucess: false, message: "user not found" });
-    }
-    if (otp != user.forgot_password_otp) {
-      return res.status(404).send({ sucess: false, message: "Invalid Otp" });
-    }
-
-    let genratetoken = async (id) => {
-      let token = await jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
-      return token;
-    };
-    let forgot_token = await genratetoken(user._id);
-    await User.findByIdAndUpdate(decode.id, { refresh_token: forgot_token });
-    res.send({ decode, refresh_token: forgot_token });
+    res.status(200).json({ success: true, message: "OTP sent", token });
   } catch (error) {
     res.status(400).send({ success: false, message: error.message });
   }
 };
 
-let newPassword = async (req, res) => {
+// user verify otp
+const verifyOtp = async (req, res) => {
   try {
-    let { refresh_token, password } = req.body;
+    const { otp, token } = req.body;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
 
-    let decode = await jwt.verify(refresh_token, process.env.JWT_SECRET);
-    if (!decode) {
-      return res.status(401).send({ success: false, message: "unauthorized" });
-    }
+    if (!user || otp !== user.forgot_password_otp)
+      return res.status(400).send({ success: false, message: "Invalid OTP" });
 
-    let user = await User.findById(decode.id);
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    await User.findByIdAndUpdate(user._id, { refresh_token: refreshToken });
 
-    if (!user) {
-      return res
-        .status(401)
-        .send({ success: false, message: "user not found" });
-    }
-    if (!user.refresh_token) {
-      return res.status(401).send({
-        success: false,
-        message: "You are not able to access this resource",
-      });
-    }
-    let saltround = await bcrypt.genSalt(10);
-    let hashpassword = await bcrypt.hash(password, saltround);
+    res.send({ success: true, refresh_token: refreshToken });
+  } catch (error) {
+    res.status(400).send({ success: false, message: error.message });
+  }
+};
 
+// user new password
+const newPassword = async (req, res) => {
+  try {
+    const { refresh_token, password } = req.body;
+    const decoded = jwt.verify(refresh_token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user || user.refresh_token !== refresh_token)
+      return res.status(401).send({ success: false, message: "Unauthorized" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     await User.findByIdAndUpdate(user._id, {
-      password: hashpassword,
+      password: hashedPassword,
       forgot_password_otp: "",
       forgot_password_token: "",
       refresh_token: "",
     });
-    res.send({ success: true, message: "password change successfully" });
+
+    res.send({ success: true, message: "Password changed successfully" });
   } catch (error) {
     res.status(400).send({ success: false, message: error.message });
   }
 };
-let resetPassword = async (req, res) => {
+
+// user reset password
+const resetPassword = async (req, res) => {
   try {
-    let { email, oldpassword, newpassword } = req.body;
-    let user = await User.findOne({ email });
-    if (!user) {
+    const { email, oldpassword, newpassword } = req.body;
+    const user = await User.findOne({ email });
+    if (!user)
+      return res
+        .status(404)
+        .send({ success: false, message: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldpassword, user.password);
+    if (!isMatch)
       return res
         .status(401)
-        .send({ success: false, message: "user not found" });
-    }
-    let verifypassword = await bcrypt.compare(oldpassword, user.password);
+        .send({ success: false, message: "Incorrect password" });
 
-    if (verifypassword) {
-      user.password = await bcrypt.hash(newpassword, 10);
-      user.save();
-    } else {
-      return res.status(401).send({ success: false, message: "Unauthorized" });
-    }
-    res.send({ success: true, message: "password reset successfully" });
+    user.password = await bcrypt.hash(newpassword, 10);
+    await user.save();
+
+    res.send({ success: true, message: "Password reset successfully" });
   } catch (error) {
     res.status(400).send({ success: false, message: error.message });
   }
 };
 
 module.exports = {
-  alluserController,
   registeruserController,
+  alluserController,
   uploadImageController,
   loginController,
   deleteuserController,

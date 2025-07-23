@@ -82,8 +82,8 @@ export default function Cart() {
                       <td className="px-4 py-4 flex items-center gap-4">
                         <img
                           src={
-                            item.img?.path
-                              ? `http://localhost:4499/uploads/${item.img.path}`
+                            item.image?.path
+                              ? `http://localhost:5000/uploads/${item.image.path}`
                               : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                                   item.name
                                 )}`

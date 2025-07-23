@@ -1,8 +1,5 @@
 const { Router } = require("express");
-const multer = require("multer");
-const path = require("path");
 const upload = require("../Middlewares/upload");
-const jwt = require("jsonwebtoken");
 const {
   addproductcontroller,
   uploadImageController,
@@ -18,20 +15,24 @@ const {
 const { update } = require("../Models/userModel.js");
 const Product = require("../Models/productModel.js");
 const User = require("../Models/userModel.js");
-const adminMiddleware = require("../Middlewares/adminMiddleware.js");
-const verifyToken = require("../Middlewares/verifyToken.js")
+// const authMiddleware = require("../Middlewares/authMiddleware.js");
+const verifyToken = require("../Middlewares/verifyToken.js");
 const authMiddleware = require("../Middlewares/authMiddleware.js");
 const { reverse } = require("dns");
 
 const router = Router();
 
+router.get("/allproducts", allproductcontroller);
+router.get("/popular", Popularcontroller);
+router.get("/reverseproducts", reverseProductscontroller);
+router.get("/product/:id", getproductcontroller);
+
 router.post("/create", upload.single("img"), addproductcontroller);
 router.delete("/delete/:id", deleteProductController);
 router.put("/update/:id", authMiddleware, updateProductController);
-router.get("/all", allproductcontroller);
-router.get("/get", getproductcontroller);
-router.put("/image", upload.any("img", 6), (req, res) => {
-  
+router.post("/addtocart", verifyToken, addToCartController);
+
+router.put("/image", upload.any("image", 6), (req, res) => {
   res.send({
     success: true,
     message: "Images uploaded successfully",
@@ -40,12 +41,12 @@ router.put("/image", upload.any("img", 6), (req, res) => {
 });
 router.post(
   "/multiimage",
-  upload.fields([{ name: "img", maxCount: 6 }, { name: "banner" }]),
+  upload.fields([{ name: "image", maxCount: 6 }, { name: "banner" }]),
   (req, res) => {
-    res.json({ images: req.files });
+    res.json({ image: req.files });
   }
 );
-router.post("/addtocart", verifyToken, addToCartController);
+
 
 router.get("/stats", async (req, res) => {
   try {
@@ -63,7 +64,6 @@ router.get("/products", async (req, res) => {
   const category = req.query.category;
 
   try {
-
     const products = await Product.find({
       category: { $regex: new RegExp(`^${category}$`, "i") },
     });
@@ -74,12 +74,12 @@ router.get("/products", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-router.get("/popular", Popularcontroller);
+// router.get("/popular", Popularcontroller);
 
-router.get("/product/:id", async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  res.json({ data: product });
-});
+// router.get("/product/:id", async (req, res) => {
+//   const product = await Product.findById(req.params.id);
+//   res.json({ data: product });
+// });
 
 router.get("/search", async (req, res) => {
   const query = req.query.q;

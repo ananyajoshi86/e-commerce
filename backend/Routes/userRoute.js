@@ -1,56 +1,73 @@
 const { Router } = require("express");
-
 const multer = require("multer");
 const path = require("path");
-const upload = require("../Middlewares/upload");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+
+const upload = require("../Middlewares/upload");
+const verifyToken = require("../Middlewares/verifyToken");
+
 const {
-  alluserController,
   registeruserController,
   loginController,
-  deleteuserController,
-  uploadImageController,
   getProfileController,
+  alluserController,
+  deleteuserController,
   forgotpassword,
   verifyOtp,
   newPassword,
   resetPassword,
-} = require("../Controllers/userController.js");
-const verifyToken = require("../Middlewares/verifyToken.js");
-const fs = require("fs");
+} = require("../Controllers/userController");
+const { uploadImageController } = require("../Controllers/productController");
+
 const router = Router();
 
-router.post("/register", upload.single("img"), registeruserController);
-router.get("/allusers", alluserController);
+// register user with image
+router.post("/register", upload.single("image"), registeruserController);
+
+// login
 router.post("/login", loginController);
-router.post("/image", upload.single("img"), uploadImageController);
-router.delete(
-  "/delete",
-  async (req, res, next) => {
-    let token = req.headers.authorization.split(" ")[1];
-    if (!token) {
-      res.status(400).send({ success: false, message: "Token Not Found" });
-    }
-    if (token) {
-      let decoded = await jwt.verify(token, process.env.SECRET_KEY);
-      console.log(decoded);
+
+// upload a single image
+router.post("/image", upload.single("image"), uploadImageController);
+
+// get all user
+router.get("/allusers", verifyToken, alluserController);
+
+// protected profile route
+router.get("/profile", verifyToken, getProfileController);
+
+// delete user by token
+router.delete(  "/delete",  async (req, res, next) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer")) {
+        return res
+          .status(401)
+          .send({ success: false, message: "Token Not Found" });
+      }
+
+      const token = authHeader.split("")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.headers.id = decoded.id;
+      next();
+    } catch (error) {
+      res.status(401).send({ success: false, message: "Unauthorized" });
     }
-    next();
   },
   deleteuserController
 );
-router.get("/profile", verifyToken, getProfileController);
 
-// forget password apis
+// set forgot password
 router.post("/forgot-password", forgotpassword);
 router.post("/verify-otp", verifyOtp);
 router.post("/newpassword", newPassword);
 router.post("/reset-password", resetPassword);
 
+// Serve static HTML for testing password reset
 router.get("/newpassword", (req, res) => {
-  let filepath = path.join(__dirname, "../newpassword.html");
-  let file = fs.readFileSync(filepath, "utf-8");
+  const filepath = path.join(__dirname, "../newpassword.html");
+  const file = fs.readFileSync(filepath, "utf-8");
   res.send(file);
 });
 

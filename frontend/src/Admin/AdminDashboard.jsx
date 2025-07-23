@@ -17,7 +17,7 @@ export default function Adminpage() {
   return (
     <div className="flex h-screen bg-gray-200">
       {/* Sidebar always visible */}
-      {/* <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} handleLogout={handleLogout} /> */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} handleLogout={handleLogout} />
 
       {/* Overlay for mobile */}
       {sidebarOpen && (

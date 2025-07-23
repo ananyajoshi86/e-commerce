@@ -1,22 +1,27 @@
 const Product = require("../Models/productModel.js");
 const User = require("../Models/userModel.js");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const { update } = require("../Models/userModel.js");
 
+//  Add Product
 const addproductcontroller = async (req, res) => {
   try {
     const { name, price, description, category, rating } = req.body;
     const file = req.file;
+
+    if (!name || !price || !description || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields",
+      });
+    }
 
     const newProduct = new Product({
       name,
       price,
       description,
       category,
-      rating,
-      img: file
+      rating: rating || 0,
+      image: file
         ? { path: file.filename, filename: file.originalname }
         : undefined,
     });
@@ -29,18 +34,20 @@ const addproductcontroller = async (req, res) => {
   }
 };
 
+//  Upload Image (Single)
 const uploadImageController = (req, res) => {
   try {
-    res.send({
+    res.status(200).json({
       success: true,
-      message: "img uploaded successfully",
-      imagename: req.file.filename,
+      message: "Image uploaded successfully",
+      image: req.file.filename,
     });
   } catch (error) {
-    res.status(400).send({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
+// Delete Product
 const deleteProductController = async (req, res) => {
   try {
     const { id } = req.params;
@@ -66,16 +73,17 @@ const deleteProductController = async (req, res) => {
   }
 };
 
+//  All Products with Pagination
 const allproductcontroller = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // default to page 1
-    const limit = parseInt(req.query.limit) || 10; // default to 10 items per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const total = await Product.countDocuments();
     const products = await Product.find().skip(skip).limit(limit);
 
-    res.status(200).send({
+    res.status(200).json({
       success: true,
       data: products,
       page,
@@ -85,13 +93,11 @@ const allproductcontroller = async (req, res) => {
       message: "Fetched paginated products successfully.",
     });
   } catch (error) {
-    res.status(500).send({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
+//  Update Product
 const updateProductController = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -99,13 +105,11 @@ const updateProductController = async (req, res) => {
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
-    // Update fields
     if (name) product.name = name;
     if (category) product.category = category;
     if (price) product.price = price;
@@ -117,33 +121,40 @@ const updateProductController = async (req, res) => {
       message: "Product updated successfully",
       product,
     });
-  } catch (err) {
-    console.error("Update error:", err.message);
+  } catch (error) {
+    console.error("Update error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error while updating product",
     });
   }
 };
+
+//  Get Product by ID (via req.params)
 const getproductcontroller = async (req, res) => {
   try {
-    const { id } = req.body; // Get id from request body
-    if (!id) {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res
         .status(400)
-        .send({ success: false, message: "ID is required" });
+        .json({ success: false, message: "Invalid product ID" });
     }
+
     const product = await Product.findById(id);
     if (!product) {
       return res
         .status(404)
-        .send({ success: false, message: "Product not found" });
+        .json({ success: false, message: "Product not found" });
     }
-    res.status(200).send({ success: true, data: product });
+
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
-    res.status(500).send({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+//  Add to Cart
 const addToCartController = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
@@ -154,6 +165,7 @@ const addToCartController = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid product ID" });
     }
+
     const user = await User.findById(userId);
     if (!user) {
       return res
@@ -161,15 +173,12 @@ const addToCartController = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    if (!user.cart) {
-      user.cart = [];
-    }
-
     const qty = Math.max(1, parseInt(quantity) || 1);
 
     const cartItem = user.cart.find(
       (item) => item.product.toString() === productId
     );
+
     if (cartItem) {
       cartItem.quantity += qty;
     } else {
@@ -187,23 +196,28 @@ const addToCartController = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// Popular Products (based on rating)
 const Popularcontroller = async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ rating: -1 }).limit(10);
-    res.status(200).json({ success: true, data: products });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-const reverseProductscontroller = async (req, res) => {
-  try {
-    const products = await Product.find({}).sort({ createdAt: -1 });
+    const products = await Product.find().sort({ rating: -1 }).limit(10);
     res.status(200).json({ success: true, data: products });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// Latest Products 
+const reverseProductscontroller = async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Export All
 module.exports = {
   addproductcontroller,
   uploadImageController,

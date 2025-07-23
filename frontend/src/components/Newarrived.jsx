@@ -46,7 +46,7 @@ function ProductCard({ product, cart, handleAddToCart }) {
           </button>
 
           <div className="flex justify-center my-4">
-            {/* <img
+            <img
               src={
                 product.img?.path
                   ? `/uploads/${product.img.path}`
@@ -56,7 +56,7 @@ function ProductCard({ product, cart, handleAddToCart }) {
               }
               alt={product.name}
               className="h-28 object-contain"
-            /> */}
+            />
           </div>
 
           <h3 className="text-sm font-medium text-gray-800">{product.name}</h3>

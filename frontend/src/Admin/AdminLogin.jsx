@@ -15,21 +15,22 @@ export default function AdminLogin() {
     setLoginError("");
 
     try {
-      const { data } = await fetch(
-        "/api/user/login",
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const data = await fetch("/api/admin/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      if (data && data.success) {
-        localStorage.setItem("adminToken", data.token);
+      let res = await data.json();
+
+      if (res && res.success) {
+        localStorage.setItem("adminToken", res.token);
         setIsLoggedIn(true);
-        navigate("/AdminSidebar/AdminDashboard"); 
+        navigate("/AdminSidebar/AdminDashboard");
       } else {
+        console.log(res);
         setIsLoggedIn(false);
         setLoginError("Account not found. Please create an account.");
       }

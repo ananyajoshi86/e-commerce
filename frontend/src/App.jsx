@@ -39,25 +39,25 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/new-password" element={<NewPassword />} />
           <Route path="/search" element={<SearchProduct />} />
-          <Route path="/adminlogin" element={<AdminLogin />} />
+          <Route path="/loginadmin" exact element={<AdminLogin />} />
           <Route
             path="/admin"
+            exact
             element={
               <ProtectedAdmin>
                 <AdminSidebar />
               </ProtectedAdmin>
             }
           >
-            <Route path="adminDashboard" element={<AdminDashboard />} />
-            <Route path="userlist" element={<Userlist />} />
-            <Route path="productlist" element={<Productlist />} />
-            <Route path="stats" element={<Stats />} />
-            <Route path="addproduct" element={<AddProduct />} />
+            <Route path="adminDashboard" exact element={<AdminDashboard />} />
+            <Route path="userlist" exact element={<Userlist />} />
+            <Route path="productlist" exact element={<Productlist />} />
+            <Route path="stats" exact element={<Stats />} />
+            <Route path="addproduct" exact element={<AddProduct />} />
           </Route>
-
-          <Route path="/product/:id" element={<Product />} />
-          <Route path="/category" element={<Category />} />
-          <Route path="/filter/:category" element={<Categoryfilter />} />
+          <Route path="/product/:id" exact element={<Product />} />
+          <Route path="/category" exact element={<Category />} />
+          <Route path="/filter/:category" exact element={<Categoryfilter />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
