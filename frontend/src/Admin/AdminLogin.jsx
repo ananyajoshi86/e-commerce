@@ -28,7 +28,7 @@ export default function AdminLogin() {
       if (res && res.success) {
         localStorage.setItem("adminToken", res.token);
         setIsLoggedIn(true);
-        navigate("/AdminDashboard");
+        navigate("/adminDashboard");
       } else {
         console.log(res);
         setIsLoggedIn(false);
