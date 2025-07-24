@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import { ToastContainer } from "react-toastify";
-import { ProtectedAdmin } from "./Admin/ProtectedAdmin";
+import  ProtectedAdmin  from "./Admin/ProtectedAdmin";
 import Home from "./components/Home";
 import Userlogin from "./Users/Userlogin";
 import Register from "./Users/Register";
@@ -18,7 +18,6 @@ import Productlist from "./components/Productlist";
 import Stats from "./components/Stats";
 
 // admin
-import ProtectedAdmin from "./Admin/ProtectedAdmin";
 import AdminDashboard from "./Admin/AdminDashboard";
 import AdminLogin from "./Admin/AdminLogin";
 import AdminSidebar from "./Admin/AdminSidebar";
