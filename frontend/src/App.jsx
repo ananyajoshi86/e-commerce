@@ -28,37 +28,92 @@ import Category from "./components/Category";
 function App() {
   return (
     <>
-   
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Userlogin />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/foret-password" element={<ForgetPassword />} />
-          <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/new-password" element={<NewPassword />} />
-          <Route path="/search" element={<SearchProduct />} />
-          <Route path="/loginadmin" element={<AdminLogin />} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Userlogin />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/foret-password" element={<ForgetPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/new-password" element={<NewPassword />} />
+        <Route path="/search" element={<SearchProduct />} />
+        <Route path="/loginadmin" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedAdmin>
+              <AdminSidebar />
+            </ProtectedAdmin>
+          }
+        >
           <Route
-            path="/admin"
+            path="adminDashboard"
             element={
               <ProtectedAdmin>
-                <AdminSidebar />
+                <AdminDashboard />
               </ProtectedAdmin>
             }
-          >
-            <Route path="adminDashboard" element={<AdminDashboard />} />
-            <Route path="userlist" element={<Userlist />} />
-            <Route path="productlist" element={<Productlist />} />
-            <Route path="stats" element={<Stats />} />
-            <Route path="addproduct" element={<AddProduct />} />
-          </Route>
-          <Route path="/product/:id" element={<Product />} />
-          <Route path="/category" element={<Category />} />
-          <Route path="/filter/:category" element={<Categoryfilter />} />
-        </Routes>
-     
+          />
+          <Route
+            path="userlist"
+            element={
+              <ProtectedAdmin>
+                <Userlist />
+              </ProtectedAdmin>
+            }
+          />
+          <Route
+            path="productlist"
+            element={
+              <ProtectedAdmin>
+                <Productlist />
+              </ProtectedAdmin>
+            }
+          />
+          <Route
+            path="stats"
+            element={
+              <ProtectedAdmin>
+                <Stats />
+              </ProtectedAdmin>
+            }
+          />
+          <Route
+            path="addproduct"
+            element={
+              <ProtectedAdmin>
+                <AddProduct />
+              </ProtectedAdmin>
+            }
+          />
+        </Route>
+        <Route
+          path="/product/:id"
+          element={
+            <ProtectedAdmin>
+              <Product />
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/category"
+          element={
+            <ProtectedAdmin>
+              <Category />
+            </ProtectedAdmin>
+          }
+        />
+        <Route
+          path="/filter/:category"
+          element={
+            <ProtectedAdmin>
+              <Categoryfilter />
+            </ProtectedAdmin>
+          }
+        />
+      </Routes>
+
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </>
   );
