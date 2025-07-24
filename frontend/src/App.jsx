@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import { ToastContainer } from "react-toastify";
-import  ProtectedAdmin  from "./Admin/ProtectedAdmin";
+import ProtectedAdmin from "./Admin/ProtectedAdmin";
 import Home from "./components/Home";
 import Userlogin from "./Users/Userlogin";
 import Register from "./Users/Register";
@@ -24,8 +24,15 @@ import AdminSidebar from "./Admin/AdminSidebar";
 
 import Categoryfilter from "./components/Categoryfilter";
 import Category from "./components/Category";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    AOS.init({ duration: 1000 });
+  }, []);
+
   return (
     <>
       <Routes>
