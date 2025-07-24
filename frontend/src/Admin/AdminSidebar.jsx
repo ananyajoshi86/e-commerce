@@ -7,6 +7,7 @@ const AdminSidebar = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <main>
+        {/* Sidebar UI */}
         <Outlet />
       </main>
     </div>

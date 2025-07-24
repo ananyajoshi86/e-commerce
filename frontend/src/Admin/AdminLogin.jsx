@@ -25,10 +25,10 @@ export default function AdminLogin() {
 
       let res = await data.json();
 
-      if (res && res.success) {
-        localStorage.setItem("adminToken", res.token);
+      if (data.token && data.admin) {
+        localStorage.setItem("adminToken", data.token);
         setIsLoggedIn(true);
-        navigate("/adminDashboard");
+        navigate("/admin/adminDashboard");
       } else {
         console.log(res);
         setIsLoggedIn(false);

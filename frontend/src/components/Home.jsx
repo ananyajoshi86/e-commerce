@@ -10,8 +10,9 @@ import Discountform from "./Discountform";
 import Newarrived from "./Newarrived";
 import Category from "./Category";
 import Hero from "./Hero";
+import Viewers from "./Viewers";
 // import Brands from './Brands'
-import Promo from "./Promo";
+import PromoCard from "./PromoCard";
 
 export default function Home() {
   return (
@@ -24,9 +25,10 @@ export default function Home() {
       <Newarrived />
       <Discountform />
       <Justarrived />
-      <Promo />
+      <PromoCard/>
       <Mostpopular />
       <Blogs />
+      <Viewers/>
       <Footer />
     </div>
   );

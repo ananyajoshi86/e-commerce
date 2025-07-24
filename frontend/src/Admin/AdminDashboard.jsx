@@ -43,9 +43,7 @@ export default function Adminpage() {
         </div>
 
         {/* Nested content */}
-        <div className="flex-1 overflow-auto">
-          <Outlet />
-        </div>
+       
       </div>
     </div>
   );
