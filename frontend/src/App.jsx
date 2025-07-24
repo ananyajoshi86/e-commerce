@@ -18,6 +18,7 @@ import Productlist from "./components/Productlist";
 import Stats from "./components/Stats";
 
 // admin
+import ProtectedAdmin from "./Admin/ProtectedAdmin";
 import AdminDashboard from "./Admin/AdminDashboard";
 import AdminLogin from "./Admin/AdminLogin";
 import AdminSidebar from "./Admin/AdminSidebar";
