@@ -28,7 +28,7 @@ import Category from "./components/Category";
 function App() {
   return (
     <>
-      <BrowserRouter>
+   
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Userlogin />} />
@@ -58,7 +58,7 @@ function App() {
           <Route path="/category" element={<Category />} />
           <Route path="/filter/:category" element={<Categoryfilter />} />
         </Routes>
-      </BrowserRouter>
+     
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </>
   );
