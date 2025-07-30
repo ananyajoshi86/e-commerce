@@ -1,56 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaHome } from "react-icons/fa";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaHome, FaShoppingCart } from "react-icons/fa";
 import { IoLogIn } from "react-icons/io5";
+import { useUser } from "../Context/UserContext";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isSticky, setIsSticky] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
   const navigate = useNavigate();
+  const { user, loading, logout } = useUser();
 
   useEffect(() => {
     const handleScroll = () => {
-      const threshold = 300;
-      setIsSticky(window.scrollY > threshold);
+      setIsSticky(window.scrollY > 300);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchUserProfile(token);
-    } else {
-      setIsLoggedIn(false);
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchUserProfile = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch("/api/user/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) throw new Error("Profile fetch failed");
-
-      const data = await res.json();
-      setUser(data.data);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error("Profile fetch error:", error);
-      localStorage.removeItem("token");
-      setIsLoggedIn(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -59,11 +26,8 @@ const Navbar = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setUser(null);
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
@@ -82,7 +46,7 @@ const Navbar = () => {
           />
         </div>
 
-        {/* 🔍 Search Form */}
+        {/* 🔍 Search Bar */}
         <form
           onSubmit={handleSearch}
           className="flex flex-grow max-w-2xl w-full"
@@ -121,29 +85,26 @@ const Navbar = () => {
           </button>
         </form>
 
+        {/* Nav Icons */}
         <div className="flex items-center space-x-6">
-          <NavLink
-            to="/"
-            className="text-md text-3xl font-semibold text-green-600"
-          >
+          <NavLink to="/" className="text-3xl text-green-600">
             <FaHome />
           </NavLink>
-          <NavLink
-            to="/cart"
-            className="text-md text-3xl font-semibold text-green-600 "
-          >
+          <NavLink to="/cart" className="text-3xl text-green-600">
             <FaShoppingCart />
           </NavLink>
-          <div className="flex items-center gap-4">
-            {!loading && isLoggedIn && user ? (
+
+          {/* Auth */}
+          {!loading && user ? (
+            <div className="relative group">
               <NavLink
                 to="/profile"
                 className="block w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500 shadow"
               >
                 <img
                   src={
-                    user.img?.path
-                      ? `/uploads/${user.img.path}`
+                    user.img?.filename
+                      ? `/uploads/${user.img.filename}`
                       : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                           user.name
                         )}`
@@ -152,15 +113,20 @@ const Navbar = () => {
                   className="w-full h-full object-cover"
                 />
               </NavLink>
-            ) : !loading ? (
-              <NavLink
-                to="/login"
-                className="text-md text-3xl font-semibold text-green-600"
-              >
-                <IoLogIn />
-              </NavLink>
-            ) : null}
-          </div>
+              <div className="absolute top-full mt-2 right-0 bg-white border rounded shadow-md hidden group-hover:block">
+                <button
+                  onClick={handleLogout}
+                  className="block w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : !loading ? (
+            <NavLink to="/login" className="text-3xl text-green-600">
+              <IoLogIn />
+            </NavLink>
+          ) : null}
         </div>
       </div>
     </header>

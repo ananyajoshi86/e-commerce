@@ -1,42 +1,38 @@
 import React, { useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
+import axios from "axios";
+import { useUser } from "../Context/UserContext"; // ✅ Import context
 
 export default function Loginpage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   const navigate = useNavigate();
+
+  const { fetchUserProfile } = useUser();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoginError("");
 
     try {
-      const { data } = await fetch(
+      const res = await axios.post(
         "/api/user/login",
         { email, password },
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true, // ✅ Send cookie
         }
       );
 
-      if (data && data.success) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.user._Id);
-        setIsLoggedIn(true);
+      if (res.data.success) {
+        await fetchUserProfile(); // ✅ Set user in context
         navigate("/");
       } else {
-        setIsLoggedIn(false);
-        setLoginError("Account not found. Please create an account.");
+        setLoginError(res.data.message);
       }
-    } catch (error) {
-      console.log(error);
-      setIsLoggedIn(false);
-      setLoginError("Invalid credentials or server error.");
+    } catch (err) {
+      console.error(err);
+      setLoginError(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -51,83 +47,70 @@ export default function Loginpage() {
                 <p className="text-gray-600 mt-2">Please sign in to continue</p>
               </div>
 
-              {isLoggedIn ? (
-                <div className="text-green-600 text-center mb-4 font-semibold">
-                  You are logged in!
+              <form onSubmit={handleSubmit}>
+                {/* Email */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300"
+                    placeholder="you@example.com"
+                  />
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit}>
-                  {/* Email Field */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-colors"
-                        placeholder="you@example.com"
-                      />
-                    </div>
-                  </div>
 
-                  {/* Password Field */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-colors"
-                        placeholder="Password"
-                      />
-                    </div>
-                  </div>
+                {/* Password */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300"
+                    placeholder="Password"
+                  />
+                </div>
 
-                  {/* Error Message */}
-                  {loginError && (
-                    <p className="text-center text-red-600 mb-4">
-                      {loginError}
-                    </p>
-                  )}
+                {/* Error */}
+                {loginError && (
+                  <p className="text-center text-red-600 mb-4">{loginError}</p>
+                )}
 
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 transition-colors"
+                {/* Submit */}
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600"
+                >
+                  Sign In
+                </button>
+
+                {/* Links */}
+                <div className="flex justify-end mt-2">
+                  <NavLink
+                    to="/forgetpassword"
+                    className="text-blue-600 hover:underline text-sm font-medium"
                   >
-                    Sign In
-                  </button>
+                    Forgot Password?
+                  </NavLink>
+                </div>
 
-                  {/* Forgot Password Link */}
-                  <div className="flex justify-end mt-2">
-                    <NavLink
-                      to="/forgetpassword"
-                      className="text-blue-600 hover:underline text-sm font-medium"
-                    >
-                      Forgot Password?
-                    </NavLink>
-                  </div>
-
-                  {/* Sign Up Link */}
-                  <p className="mt-6 text-center text-gray-600">
-                    Don't have an account?{" "}
-                    <NavLink
-                      to="/createaccount"
-                      className="text-blue-600 hover:text-blue-400 font-semibold"
-                    >
-                      Sign up from here
-                    </NavLink>
-                  </p>
-                </form>
-              )}
+                <p className="mt-6 text-center text-gray-600">
+                  Don't have an account?{" "}
+                  <NavLink
+                    to="/createaccount"
+                    className="text-blue-600 hover:text-blue-400 font-semibold"
+                  >
+                    Sign up from here
+                  </NavLink>
+                </p>
+              </form>
             </div>
           </div>
         </div>

@@ -53,7 +53,7 @@ const Navigation = () => {
         </div>
       </nav>
 
-      {/* <Category open={open} opencategory={setOpen} /> */}
+      <Category open={open} opencategory={setOpen} />
     </>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 
 export default function Profilepage() {
@@ -11,20 +11,17 @@ export default function Profilepage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        const res = await fetch("/api/user/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await axios.get("/api/user/profile", {
+          withCredentials: true,
         });
 
-        setUser(res.data.data);
+        if (res.data && res.data.success) {
+          setUser(res.data.data);
+        } else {
+          setUser(null);
+        }
       } catch (error) {
+        console.error("Profile fetch error:", error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -59,10 +56,11 @@ export default function Profilepage() {
               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-300 shadow-lg mb-6">
                 <img
                   src={
-                    user.img?.path
-                      ? `/uploads/${user.img.path}`
-                      : "https://ui-avatars.com/api/?name=" +
-                        encodeURIComponent(user.name)
+                    user.img
+                      ? `/uploads/${user.img}`
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          user.name
+                        )}`
                   }
                   alt={user.name}
                   className="w-full h-full object-cover"
@@ -72,6 +70,7 @@ export default function Profilepage() {
                 {user.name}
               </h2>
               <p className="text-lg text-gray-600 mb-4">{user.email}</p>
+
               <div className="w-full flex flex-col items-center gap-4">
                 <div className="flex w-full max-w-md justify-between bg-blue-100 rounded-lg px-6 py-3 shadow">
                   <span className="font-semibold text-blue-700">User ID:</span>
@@ -89,7 +88,6 @@ export default function Profilepage() {
                 </div>
               </div>
 
-              {/* 🔴 Logout Button */}
               <button
                 onClick={handleLogout}
                 className="mt-6 bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded-lg shadow"

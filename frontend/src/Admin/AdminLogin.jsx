@@ -1,12 +1,12 @@
-// AdminLogin.jsx
+// AdminLogin.jsx - Axios Based Login
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const navigate = useNavigate();
 
@@ -15,29 +15,21 @@ export default function AdminLogin() {
     setLoginError("");
 
     try {
-      const data = await fetch("/api/admin/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await axios.post(
+        "/api/admin/login",
+        { email, password },
+        { withCredentials: true }
+      );
 
-      let res = await data.json();
-
-      if (data.token && data.admin) {
-        localStorage.setItem("adminToken", data.token);
-        setIsLoggedIn(true);
-        navigate("/admin/adminDashboard");
+      if (res.status === 200) {
+        navigate("/admin/admindashboard");
       } else {
-        console.log(res);
-        setIsLoggedIn(false);
-        setLoginError("Account not found. Please create an account.");
+        setLoginError(res.data.message || "Login failed.");
       }
     } catch (error) {
-      console.log(error);
-      setIsLoggedIn(false);
-      setLoginError("Invalid credentials or server error.");
+      setLoginError(
+        error.response?.data?.message || "Invalid credentials or server error."
+      );
     }
   };
 
@@ -54,10 +46,9 @@ export default function AdminLogin() {
             </label>
             <input
               type="email"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring"
+              className="w-full px-4 py-2 border rounded-lg"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.com"
               required
             />
           </div>
@@ -67,20 +58,17 @@ export default function AdminLogin() {
             </label>
             <input
               type="password"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring"
+              className="w-full px-4 py-2 border rounded-lg"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
               required
             />
           </div>
-
           {loginError && (
             <p className="text-red-500 text-sm text-center mb-4">
               {loginError}
             </p>
           )}
-
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"

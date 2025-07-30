@@ -1,11 +1,10 @@
 const { Router } = require("express");
-const multer = require("multer");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 
 const upload = require("../Middlewares/upload");
-const verifyToken = require("../Middlewares/verifyToken");
+const userAuth = require("../Middlewares/userMiddleware");
 
 const {
   registeruserController,
@@ -17,25 +16,23 @@ const {
   verifyOtp,
   newPassword,
   resetPassword,
+  logoutController
 } = require("../Controllers/userController");
 const { uploadImageController } = require("../Controllers/productController");
 
 const router = Router();
 
 // register user with image
-router.post("/register", upload.single("image"), registeruserController);
+router.post("/register", upload.single("img"), registeruserController);
 
 // login
 router.post("/login", loginController);
 
-// upload a single image
-router.post("/image", upload.single("image"), uploadImageController);
-
 // get all user
-router.get("/allusers", verifyToken, alluserController);
+router.get("/allusers", alluserController);
 
 // protected profile route
-router.get("/profile", verifyToken, getProfileController);
+router.get("/profile", userAuth, getProfileController);
 
 // delete user by token
 router.delete(  "/delete",  async (req, res, next) => {
@@ -57,6 +54,9 @@ router.delete(  "/delete",  async (req, res, next) => {
   },
   deleteuserController
 );
+
+// logout
+router.post("/logout", logoutController);
 
 // set forgot password
 router.post("/forgot-password", forgotpassword);

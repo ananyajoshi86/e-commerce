@@ -6,6 +6,14 @@ const mongoose = require("mongoose");
 const addproductcontroller = async (req, res) => {
   try {
     const { name, price, description, category, rating } = req.body;
+    let image = null;
+    if(req.file){
+    image = {
+      filename: req.file.filename,
+      path: `http://localhost:5000/uploads/${req.file.filename}`,
+    };
+    }
+
     const file = req.file;
 
     if (!name || !price || !description || !category) {
@@ -21,9 +29,7 @@ const addproductcontroller = async (req, res) => {
       description,
       category,
       rating: rating || 0,
-      image: file
-        ? { path: "https://e-commerce-foodmart.onrender.com/" + file.filename, filename: file.originalname }
-        : undefined,
+      image
     });
 
     await newProduct.save();
@@ -31,19 +37,6 @@ const addproductcontroller = async (req, res) => {
   } catch (error) {
     console.error("Add Product Error:", error);
     res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-//  Upload Image (Single)
-const uploadImageController = (req, res) => {
-  try {
-    res.status(200).json({
-      success: true,
-      message: "Image uploaded successfully",
-      image: req.file.filename,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -220,7 +213,6 @@ const reverseProductscontroller = async (req, res) => {
 // Export All
 module.exports = {
   addproductcontroller,
-  uploadImageController,
   deleteProductController,
   updateProductController,
   allproductcontroller,

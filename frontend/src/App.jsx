@@ -1,7 +1,14 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./App.css";
-import { ToastContainer } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
+// Pages
+import AdminLogin from "./Admin/AdminLogin";
+import AdminDashboard from "./Admin/AdminDashboard";
 import ProtectedAdmin from "./Admin/ProtectedAdmin";
+import AdminSidebar from "./Admin/AdminSidebar";
+import AddProduct from "./Admin/AddProduct";
+import Userlist from "./Admin/Userlist";
+import ProductList from "./Admin/Productlist";
 import Home from "./components/Home";
 import Userlogin from "./Users/Userlogin";
 import Register from "./Users/Register";
@@ -11,41 +18,17 @@ import ForgetPassword from "./Pages/ForgetPassword";
 import VerifyOtp from "./Pages/VerifyOtp";
 import NewPassword from "./Pages/NewPassword";
 import SearchProduct from "./components/SearchProduct";
-import AddProduct from "./components/AddProduct";
 import Product from "./components/Product";
-import Userlist from "./Users/Userlist";
-import Productlist from "./components/Productlist";
-import Stats from "./components/Stats";
-
-// admin
-import AdminDashboard from "./Admin/AdminDashboard";
-import AdminLogin from "./Admin/AdminLogin";
-import AdminSidebar from "./Admin/AdminSidebar";
-
-import Categoryfilter from "./components/Categoryfilter";
-import Category from "./components/Category";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import { useEffect } from "react";
+// import Categoryfilter from "./components/Categoryfilter";
+// import Category from "./components/Category";
 
 function App() {
-  useEffect(() => {
-    AOS.init({ duration: 1000 });
-  }, []);
-
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Userlogin />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/foret-password" element={<ForgetPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/new-password" element={<NewPassword />} />
-        <Route path="/search" element={<SearchProduct />} />
+        {/* Admin Login */}
         <Route path="/loginadmin" element={<AdminLogin />} />
+        {/* Admin Protected Routes */}
         <Route
           path="/admin"
           element={
@@ -54,74 +37,24 @@ function App() {
             </ProtectedAdmin>
           }
         >
-          <Route
-            path="adminDashboard"
-            element={
-              <ProtectedAdmin>
-                <AdminDashboard />
-              </ProtectedAdmin>
-            }
-          />
-          <Route
-            path="userlist"
-            element={
-              <ProtectedAdmin>
-                <Userlist />
-              </ProtectedAdmin>
-            }
-          />
-          <Route
-            path="productlist"
-            element={
-              <ProtectedAdmin>
-                <Productlist />
-              </ProtectedAdmin>
-            }
-          />
-          <Route
-            path="stats"
-            element={
-              <ProtectedAdmin>
-                <Stats />
-              </ProtectedAdmin>
-            }
-          />
-          <Route
-            path="addproduct"
-            element={
-              <ProtectedAdmin>
-                <AddProduct />
-              </ProtectedAdmin>
-            }
-          />
+          <Route path="adminDashboard" element={<AdminDashboard />} />
+          <Route path="addproduct" element={<AddProduct />} />
+          <Route path="userlist" element={<Userlist />} />
+          <Route path="productlist" element={<ProductList />} />
+          {/* Add more admin routes here */}
         </Route>
-        <Route
-          path="/product/:id"
-          element={
-            <ProtectedAdmin>
-              <Product />
-            </ProtectedAdmin>
-          }
-        />
-        <Route
-          path="/category"
-          element={
-            <ProtectedAdmin>
-              <Category />
-            </ProtectedAdmin>
-          }
-        />
-        <Route
-          path="/filter/:category"
-          element={
-            <ProtectedAdmin>
-              <Categoryfilter />
-            </ProtectedAdmin>
-          }
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Userlogin />} />
+        <Route path="/login" element={<Userlogin />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/foret-password" element={<ForgetPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/new-password" element={<NewPassword />} />
+        <Route path="/search" element={<SearchProduct />} />
       </Routes>
-
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </>
   );
 }

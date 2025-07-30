@@ -3,40 +3,53 @@ const User = require("../Models/userModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../Middlewares/sendEmail.js");
-const mongoose = require("mongoose");
 
 // register user
 const registeruserController = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    const image = null;
+    let image = null;
+
     if (req.file) {
-      image = {
-        filename: req.file.filename,
-        path: "http://localhost:5000/" + req.file.path,
-      };
+     image = {
+       filename: req.file.filename,
+       path: `http://localhost:5000/uploads/${req.file.filename}`,
+     };
     }
-    if (!name || !email || !password ) {
+
+    if (!name || !email || !password) {
       return res
         .status(400)
         .send({ success: false, message: "Missing required fields" });
     }
-     const user = await User.findOne({ email });
-     if (user) {
-       return res
-         .status(400)
-         .send({ success: false, message: "User already registered" });
-     }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .send({ success: false, message: "User already registered" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
+      img: image,
     });
+
     await sendEmail(email);
-    res
-      .status(201)
-      .send({ success: true, message: "Created Successfully", data: newUser });
+
+   
+    res.status(201).send({
+      success: true,
+      message: "User registered successfully",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      },
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
@@ -56,51 +69,60 @@ const alluserController = async (req, res) => {
   }
 };
 
-// upload user image
-const uploadImageController = (req, res) => {
-  try {
-    res.send({
-      success: true,
-      message: "Image uploaded successfully",
-      image: req.file.filename,
-    });
-  } catch (error) {
-    res.status(400).send({ success: false, message: error.message });
-  }
-};
-
 // user login
 const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).send({success:false, message:"Email and password are required"})
-    }
     const user = await User.findOne({ email });
-    if (!user)
+    if (!user) {
       return res
         .status(404)
         .send({ success: false, message: "User not found" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    if (!isMatch) {
       return res
         .status(401)
         .send({ success: false, message: "Invalid credentials" });
+    }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email, name: user.name, img: user.img },
+      { id: user._id, email: user.email, name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
 
-    res
-      .status(200)
-      .send({ success: true, message: "Login successful", token, user });
+    // Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    }).status(200).send({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
+};
+
+// logout user
+const logoutController = async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+  res.send({ success: true, message: "Logged out successfully" });
 };
 
 // delete user
@@ -129,7 +151,7 @@ const getProfileController = async (req, res) => {
         .status(404)
         .send({ success: false, message: "User not found" });
 
-    res.status(200).send({ success: true, data: user });
+    res.status(200).json({ success: true, data: { _id, name, email, img, createdAt,} });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
@@ -235,8 +257,8 @@ const resetPassword = async (req, res) => {
 module.exports = {
   registeruserController,
   alluserController,
-  uploadImageController,
   loginController,
+  logoutController,
   deleteuserController,
   getProfileController,
   forgotpassword,

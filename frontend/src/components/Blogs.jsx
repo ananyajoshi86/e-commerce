@@ -1,11 +1,7 @@
 import React from "react";
-
-import { Link, NavLink } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import { Navigation } from "swiper/modules";
 export default function Blogs() {
   return (
     <div>

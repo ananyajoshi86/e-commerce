@@ -4,14 +4,14 @@ const promos = [
   {
     title: "Luxa Dark Chocolate",
     description: "Very tasty & creamy vanilla flavour creamy muffins.",
-    image: "/chocolate.png", 
+    image: "/chocolate.png",
     bg: "bg-red-50",
     textColor: "text-black",
   },
   {
     title: "Creamy Muffins",
     description: "Very tasty & creamy vanilla flavour creamy muffins.",
-    image: "/muffin.png", 
+    image: "/muffins-removebg-preview.png",
     bg: "bg-blue-50",
     textColor: "text-black",
   },

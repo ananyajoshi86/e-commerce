@@ -58,9 +58,7 @@ const Categoryfilter = () => {
     const fetchFilteredProducts = async () => {
       try {
         const response = await fetch(
-          `/api/user/products?category=${encodeURIComponent(
-            category
-          )}`
+          `/api/user/products?category=${encodeURIComponent(category)}`
         );
         const data = await response.json();
         setProducts(data);

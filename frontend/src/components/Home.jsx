@@ -11,7 +11,7 @@ import Newarrived from "./Newarrived";
 import Category from "./Category";
 import Hero from "./Hero";
 import Viewers from "./Viewers";
-// import Brands from './Brands'
+import Brands from './Brands'
 import PromoCard from "./PromoCard";
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
       <Header/>
       <Hero />
       <Category />
-      {/* <Brands/> */}
+      <Brands/>
       <Newarrived />
       <Discountform />
       <Justarrived />

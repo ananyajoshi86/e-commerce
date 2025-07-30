@@ -2,7 +2,6 @@ const { Router } = require("express");
 const upload = require("../Middlewares/upload");
 const {
   addproductcontroller,
-  uploadImageController,
   updateProductController,
   deleteProductController,
   allproductcontroller,
@@ -16,9 +15,7 @@ const { update } = require("../Models/userModel.js");
 const Product = require("../Models/productModel.js");
 const User = require("../Models/userModel.js");
 // const authMiddleware = require("../Middlewares/authMiddleware.js");
-const verifyToken = require("../Middlewares/verifyToken.js");
 const authMiddleware = require("../Middlewares/authMiddleware.js");
-const { reverse } = require("dns");
 
 const router = Router();
 
@@ -30,7 +27,7 @@ router.get("/product/:id", getproductcontroller);
 router.post("/create", upload.single("img"), addproductcontroller);
 router.delete("/delete/:id", deleteProductController);
 router.put("/update/:id", authMiddleware, updateProductController);
-router.post("/addtocart", verifyToken, addToCartController);
+router.post("/addtocart", addToCartController);
 
 router.put("/image", upload.any("image", 6), (req, res) => {
   res.send({

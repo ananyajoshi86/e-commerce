@@ -83,7 +83,7 @@ export default function Cart() {
                         <img
                           src={
                             item.image?.path
-                              ? `http://localhost:5000/uploads/${item.image.path}`
+                              ? `/uploads/${item.image.path}`
                               : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                                   item.name
                                 )}`
@@ -146,7 +146,7 @@ export default function Cart() {
           )}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
