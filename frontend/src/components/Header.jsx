@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import { HiMenuAlt1 } from "react-icons/hi";
 import { FaAngleDown } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Category from "./Category";
+// import Category from "./Category";
 // import Header from "./Header"
 const Navigation = () => {
   const [open, setOpen] = useState(false);
@@ -53,7 +53,7 @@ const Navigation = () => {
         </div>
       </nav>
 
-      <Category open={open} opencategory={setOpen} />
+      {/* <Category open={open} opencategory={setOpen} /> */}
     </>
   );
 };
