@@ -22,6 +22,7 @@ const port = process.env.PORT || 5000;
 dotenv.config();
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 connectDb();
 app.use("/api/user", userRoute);
@@ -35,7 +36,6 @@ app.use((err, req, res, next) => {
     .send({ success: false, message: err.message || "Route not found" });
 });
 
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));

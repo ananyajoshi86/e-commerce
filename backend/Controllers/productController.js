@@ -10,7 +10,7 @@ const addproductcontroller = async (req, res) => {
     if(req.file){
     image = {
       filename: req.file.filename,
-      path: `http://localhost:5000/uploads/${req.file.filename}`,
+      path: `https://e-commerce-foodmart.onrender.com/uploads/${req.file.filename}`,
     };
     }
 
